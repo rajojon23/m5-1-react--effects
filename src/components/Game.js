@@ -12,16 +12,16 @@ import cookieSrc from "../cookie.svg";
 
 
 const items = [
-  { id: "cursor", name: "Cursor", cost: 10, value: 1 },
-  { id: "grandma", name: "Grandma", cost: 100, value: 10 },
-  { id: "farm", name: "Farm", cost: 1000, value: 80 },
-  
+  { id: "cursor", name: "Cursor", cost: 10, value: 1, clickAdd: 0 },
+  { id: "grandma", name: "Grandma", cost: 100, value: 10, clickAdd: 0 },
+  { id: "farm", name: "Farm", cost: 1000, value: 80, clickAdd: 0 },
+  { id: "megacursor", name: "Mega Cursor", cost: 10000, value: 0, clickAdd: 50 },
 ];
 
 
 
 
-
+let power = 0;
 let number = 99;
 const Game = () => {
   // TODO: Replace this with React state!
@@ -29,6 +29,7 @@ const Game = () => {
     cursor: 0,
     grandma: 0,
     farm: 0,
+    megacursor: 0,
   });
   let [numCookies, setNumCookies] = useState(number);
   
@@ -36,29 +37,34 @@ const Game = () => {
 
   useEffect(() => {
     increaseCookies();
-    console.log("cookie increase");
 
   }, [setNumCookies ]);
 
-  useEffect(() => {
-    console.log("item increase");
-
-
-  }, [setPurchasedItems ]);
 
 
 
   const increaseCookies = () =>{
-    setNumCookies(numCookies++);
+    
+
+    if(purchasedItems["megacursor"] > 0){//if at least one mega has been purchased, take care of it 
+
+      let mega = items.find(item => item.id === "megacursor");
+
+      setNumCookies(numCookies+mega.clickAdd);
+    }
+    else{
+      setNumCookies(numCookies++);
+    }
+
   };
 
   //custom Hooks
   useDocTitle(`${numCookies} cookies`, increaseCookies );
-  // useKeyDown(32, increaseCookies);
+  useKeyDown(32, increaseCookies);
 
   useInterval(() => {
     const numOfGeneratedCookies = calculateCookiesPerTick(purchasedItems);
-    console.log("cookies should increase");
+
     setNumCookies(numCookies+numOfGeneratedCookies);
   }, 1000);
 
@@ -67,10 +73,8 @@ const Game = () => {
 
     const handleClick = (itemName, owned) => {
 
-      // let itemUpdate = {...purchasedItems, itemName: owned }; this was suggested but won't work, the state setter will literally take the name of the variable and not its value 
+      // let itemUpdate = {...purchasedItems, itemName: itemUpdate[itemName]++ }; this was suggested but won't work, the state setter will literally take the name of the variable and not its value 
       let itemUpdate = purchasedItems;
-
-      console.log("numCookies", numCookies);
 
       let itemFound = items.find(item => item.id === itemName);
 
@@ -79,6 +83,9 @@ const Game = () => {
         setNumCookies(numCookies-itemFound.cost);
         itemUpdate[itemName]++;
         setPurchasedItems({...itemUpdate});
+
+        //Exercise 9 [uncomment below to apply] This will apply an Increased pricing for a clicked item, the growth will be exponential
+        // changeItemsCost(itemFound);
       }
       else{
         alert("not enough cookies!");
@@ -97,6 +104,21 @@ const Game = () => {
       });
 
       return total;
+    }
+
+
+
+    const changeItemsCost = (itemFound) =>{
+      items.forEach((item) =>{
+
+        if(item == itemFound){
+          item.cost += Math.pow(2, power);//Simple math to increase the price. Not a mathematician, so no fancy idea here ¯\_(ツ)_/¯ 
+        }
+        
+        
+      });
+
+      power++;
     }
 
     let cookiesPerSec = calculateCookiesPerTick(purchasedItems);//
@@ -145,8 +167,16 @@ const Button = styled.button`
   cursor: pointer;
 `;
 
+
 const Cookie = styled.img`
   width: 200px;
+  :active {
+    transform: scale(1.4);
+    -webkit-transform:  scale(1.4);
+    -ms-transform:  scale(1.4);
+    transition:  0.2s;
+ }
+
 `;
 
 const ItemArea = styled.div`

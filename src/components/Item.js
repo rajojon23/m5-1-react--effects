@@ -7,6 +7,13 @@ const Item = ({numOwned,itemID, handleClick, itemIndex, items}) =>{
     // console.log("numOwned,", numOwned );
     let itemFound = items.find(item => item.id === itemID);
 
+    let frequency = "cookies/second";
+    let value = itemFound.value;
+    if(itemFound.id === "megacursor"){
+        frequency = "cookies/click";
+        value = itemFound.clickAdd;
+    }
+
     // console.log("itemFound received",itemFound);
 
     useEffect(() => {
@@ -20,8 +27,8 @@ const Item = ({numOwned,itemID, handleClick, itemIndex, items}) =>{
 
     return <Wrapper onClick={() => handleClick(itemID, numOwned)}  ref={itemButton}>
         <ItemData>
-            <Name>{itemID}</Name>
-            <Details>Cost: {itemFound.cost} cookie(s).Produces {itemFound.value} cookies/second</Details>
+            <Name>{itemFound.name}</Name>
+            <Details>Cost: {itemFound.cost} cookie(s). Produces {value} {frequency}</Details>
             {/* <Details>Cost: 10 cookie(s).Produces 1 cookies/second</Details> */}
         </ItemData>
         <ItemCount>
